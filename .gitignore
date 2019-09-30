@@ -7,4 +7,5 @@
 /.idea
 cmake-build*
 /.dir-locals.el
+.ccls-cache
 *~
