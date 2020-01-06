@@ -42,7 +42,7 @@ PluginVisualize::PluginVisualize(FrameBuffer *_buffer,
   _v_detected_edges = new VarBool("detected edges", false);
   _v_complete_sobel = new VarBool("complete edge detection", false);
   _v_complete_sobel->setBool(false);
-  _v_chessboard = new VarBool("chessbooard", false);
+  _v_chessboard = new VarBool("chessboard", false);
 
   _settings = new VarList("Visualization");
   _settings->addChild(_v_enabled);
