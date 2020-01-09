@@ -264,6 +264,8 @@ qt4_wrap_cpp (MOC_SRCS
 
 	src/app/stacks/multistack_robocup_ssl.h
 
+	src/shared/util/camera_parameters.h
+
 	${OPTIONAL_HEADERS}
 )
 
