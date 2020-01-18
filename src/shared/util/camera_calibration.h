@@ -72,8 +72,8 @@ public:
 
   AdditionalCalibrationInformation* additional_calibration_information;
 
-  VarBool*use_opencv_model;
-  CameraIntrinsicParameters*  intrinsic_parameters;
+  VarBool* use_opencv_model;
+  CameraIntrinsicParameters* intrinsic_parameters;
   CameraExtrinsicParameters* extrinsic_parameters;
 
   GVector::vector3d<double> getWorldLocation();
@@ -154,6 +154,7 @@ public:
 
       VarInt *grid_width;
       VarInt *grid_height;
+      VarInt *global_camera_id;
   private:
       RoboCupField* field;
       std::vector<GVector::vector2d<double> >
