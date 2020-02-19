@@ -28,6 +28,8 @@
 #include "cmvision_region.h"
 #include "camera_calibration.h"
 #include "field.h"
+#include "plugin_mask.h"
+#include "convex_hull_image_mask.h"
 
 /**
 	@author Stefan Zickler
@@ -64,10 +66,12 @@ protected:
   VarDouble * _v_calibration_result_pillars_height;
   VarBool * _v_complete_sobel;
   VarBool * _v_detected_edges;
+  VarBool * _v_mask_hull;
   VarBool * _v_chessboard;
 
   const CameraParameters& camera_parameters;
   const RoboCupField& real_field;
+  const ConvexHullImageMask& _image_mask;
 
   LUT3D * _threshold_lut;
   greyImage* edge_image;
@@ -106,10 +110,12 @@ protected:
 
   void DrawSearchCorridors(FrameData* data, VisualizationFrame* vis_frame);
 
+  void DrawMaskHull(FrameData* data, VisualizationFrame* vis_frame);
+
   static void DrawChessboard(FrameData* data, VisualizationFrame* vis_frame);
 public:
   PluginVisualize(FrameBuffer* _buffer, const CameraParameters& camera_params,
-                  const RoboCupField& real_field);
+                  const RoboCupField& real_field, const ConvexHullImageMask &mask);
 
   ~PluginVisualize() override;
 

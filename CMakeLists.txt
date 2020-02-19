@@ -200,6 +200,7 @@ set (SRCS ${SRCS}
 	src/app/framedata.cpp
 	src/app/main.cpp
 
+    src/app/gui/maskwidget.cpp
 	src/app/gui/automatedcolorcalibwidget.cpp
 	src/app/gui/camera_intrinsic_calib_widget.cpp
 	src/app/gui/cameracalibwidget.cpp
@@ -213,6 +214,7 @@ set (SRCS ${SRCS}
 	src/app/gui/videowidget.cpp
 	src/app/gui/jog_dial.cpp
 
+	src/app/plugins/plugin_mask.cpp
 	src/app/plugins/plugin_cameracalib.cpp
 	src/app/plugins/plugin_camera_intrinsic_calib.cpp
 	src/app/plugins/plugin_colorcalib.cpp
@@ -242,6 +244,7 @@ set (SRCS ${SRCS}
 qt4_wrap_cpp (MOC_SRCS
 	src/app/capture_thread.h
 
+	src/app/gui/maskwidget.h
 	src/app/gui/automatedcolorcalibwidget.h
 	src/app/gui/camera_intrinsic_calib_widget.h
 	src/app/gui/cameracalibwidget.h
@@ -253,6 +256,7 @@ qt4_wrap_cpp (MOC_SRCS
 	src/app/gui/jog_dial.h
 
 	src/shared/util/lut3d.h
+	src/shared/util/convex_hull_image_mask.h
 
 	src/app/plugins/plugin_dvr.h
 	src/app/plugins/plugin_publishgeometry.h
