@@ -23,6 +23,7 @@ void TimeSync::update(uint64_t timestamp) {
     if (offsetBuffer.empty()) {
       std::cout << "Start syning with system clock" << std::endl;
     }
+    std::cout << "avgDiff: " << avgDiff << std::endl;
     offsetBuffer.push_back(timestamp - tRef);
     if (offsetBuffer.size() > BUFFER_SIZE)
       offsetBuffer.pop_front();
