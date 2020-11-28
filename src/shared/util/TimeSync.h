@@ -21,7 +21,7 @@ private:
   std::deque<int64_t> diffBuffer;
 
   static int64_t calcOffset(uint64_t tRef, uint64_t tOther);
-  static uint64_t average(const std::deque<int64_t> &deque);
+  static int64_t average(const std::deque<int64_t> &deque);
 };
 
 #endif // SSL_VISION_TIMESYNC_H

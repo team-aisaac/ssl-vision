@@ -16,7 +16,7 @@ void TimeSync::update(uint64_t timestamp) {
   diffBuffer.push_back(diff);
   if (diffBuffer.size() > BUFFER_SIZE)
     diffBuffer.pop_front();
-  uint64_t avgDiff = average(diffBuffer);
+  uint64_t avgDiff = labs(average(diffBuffer));
 
   if ((avgDiff > MAX_AVG_DIFF) || !offsetBuffer.empty()) {
     // Start syncing
@@ -53,11 +53,11 @@ int64_t TimeSync::calcOffset(uint64_t tRef, uint64_t tOther) {
   return tOther - tRef;
 }
 
-uint64_t TimeSync::average(const std::deque<int64_t> &deque) {
+int64_t TimeSync::average(const std::deque<int64_t> &deque) {
   int size = deque.size();
   double avg = 0;
   for (auto l : deque) {
     avg += (double)l / size;
   }
-  return (uint64_t)fabs(avg);
+  return avg;
 }
