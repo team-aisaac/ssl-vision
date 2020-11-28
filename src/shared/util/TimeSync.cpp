@@ -23,11 +23,15 @@ void TimeSync::update(uint64_t timestamp) {
     if (offsetBuffer.empty()) {
       std::cout << "Start syning with system clock" << std::endl;
     }
-    std::cout << "avgDiff: " << avgDiff << std::endl;
-    offsetBuffer.push_back(timestamp - tRef);
+    int64_t offset = timestamp - tRef;
+    offsetBuffer.push_back(offset);
     if (offsetBuffer.size() > BUFFER_SIZE)
       offsetBuffer.pop_front();
     currentOffset = average(offsetBuffer);
+    std::cout << "avgDiff: " << avgDiff
+              << " currentOffset: " << currentOffset
+              << " offset: " << offset
+              << std::endl;
     if (avgDiff < SYNC_ACCURACY) {
       // Converged, stop syncing with reference clock
       std::cout << "Synced with system clock. offset=" << currentOffset
