@@ -13,7 +13,6 @@ public:
 
   void update(uint64_t timestamp);
   uint64_t sync(uint64_t timestamp) const;
-  uint64_t reverseSync(uint64_t timestamp) const;
 
 private:
   int64_t currentOffset;

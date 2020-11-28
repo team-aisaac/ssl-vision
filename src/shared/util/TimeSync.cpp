@@ -41,10 +41,6 @@ uint64_t TimeSync::sync(uint64_t timestamp) const {
   return timestamp - currentOffset;
 }
 
-uint64_t TimeSync::reverseSync(uint64_t timestamp) const {
-  return timestamp + currentOffset;
-}
-
 int64_t TimeSync::calcOffset(uint64_t tRef, uint64_t tOther) {
   return tOther - tRef;
 }
