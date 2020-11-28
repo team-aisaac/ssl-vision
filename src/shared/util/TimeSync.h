@@ -2,6 +2,9 @@
 #define SSL_VISION_TIMESYNC_H
 
 #include <deque>
+#include <sys/time.h>
+#include <iostream>
+#include <cmath>
 
 class TimeSync {
 
@@ -19,6 +22,6 @@ private:
 
   static long calcOffset(long tRef, long tOther);
   static long average(const std::deque<long> &deque);
-}
+};
 
 #endif // SSL_VISION_TIMESYNC_H

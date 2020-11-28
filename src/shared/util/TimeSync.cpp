@@ -1,7 +1,4 @@
 #include "TimeSync.h"
-#include <cmath>
-#include <sys/time.h>
-#include <iostream>
 
 const int BUFFER_SIZE = 30;
 const long MAX_AVG_DIFF = 3e8L; // 300ms
