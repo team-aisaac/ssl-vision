@@ -11,17 +11,17 @@ class TimeSync {
 public:
   TimeSync();
 
-  void update(long timestamp);
-  long sync(long timestamp) const;
-  long reverseSync(long timestamp) const;
+  void update(uint64_t timestamp);
+  uint64_t sync(uint64_t timestamp) const;
+  uint64_t reverseSync(uint64_t timestamp) const;
 
 private:
-  long currentOffset;
-  std::deque<long> offsetBuffer;
-  std::deque<long> diffBuffer;
+  int64_t currentOffset;
+  std::deque<int64_t> offsetBuffer;
+  std::deque<int64_t> diffBuffer;
 
-  static long calcOffset(long tRef, long tOther);
-  static long average(const std::deque<long> &deque);
+  static int64_t calcOffset(uint64_t tRef, uint64_t tOther);
+  static uint64_t average(const std::deque<int64_t> &deque);
 };
 
 #endif // SSL_VISION_TIMESYNC_H

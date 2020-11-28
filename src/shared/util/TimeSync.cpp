@@ -1,22 +1,22 @@
 #include "TimeSync.h"
 
 const int BUFFER_SIZE = 30;
-const long MAX_AVG_DIFF = 3e8L; // 300ms
-const long SYNC_ACCURACY = 1e6L; // 1ms
+const uint64_t MAX_AVG_DIFF = 3e8L; // 300ms
+const uint64_t SYNC_ACCURACY = 1e6L; // 1ms
 
 TimeSync::TimeSync() { currentOffset = 0; }
 
-void TimeSync::update(long timestamp) {
-  timeval tv;
+void TimeSync::update(uint64_t timestamp) {
+  timeval tv = {};
   gettimeofday(&tv, nullptr);
-  long tRef = tv.tv_sec * 1e9L + tv.tv_usec * 1e3L;
-  long tSynced = timestamp - currentOffset;
+  uint64_t tRef = tv.tv_sec * 1e9L + tv.tv_usec * 1e3L;
+  uint64_t tSynced = timestamp - currentOffset;
 
-  long diff = tRef - tSynced;
+  int64_t diff = tRef - tSynced;
   diffBuffer.push_back(diff);
   if (diffBuffer.size() > BUFFER_SIZE)
     diffBuffer.pop_front();
-  long avgDiff = labs(average(diffBuffer));
+  uint64_t avgDiff = average(diffBuffer);
 
   if ((avgDiff > MAX_AVG_DIFF) || !offsetBuffer.empty()) {
     // Start syncing
@@ -33,19 +33,19 @@ void TimeSync::update(long timestamp) {
   }
 }
 
-long TimeSync::sync(long timestamp) const { return timestamp - currentOffset; }
+uint64_t TimeSync::sync(uint64_t timestamp) const { return timestamp - currentOffset; }
 
-long TimeSync::reverseSync(long timestamp) const {
+uint64_t TimeSync::reverseSync(uint64_t timestamp) const {
   return timestamp + currentOffset;
 }
 
-long TimeSync::calcOffset(long tRef, long tOther) { return tOther - tRef; }
+int64_t TimeSync::calcOffset(uint64_t tRef, uint64_t tOther) { return tOther - tRef; }
 
-long TimeSync::average(const std::deque<long> &deque) {
+uint64_t TimeSync::average(const std::deque<int64_t> &deque) {
   int size = deque.size();
-  long avg = 0;
-  for (long l : deque) {
-    avg += l;
+  double avg = 0;
+  for (auto l : deque) {
+    avg += (double) l / size;
   }
-  return avg / size;
+  return (uint64_t) fabs(avg);
 }
