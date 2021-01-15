@@ -48,9 +48,11 @@ if(EXISTS ${PROTOBUF_PROTOC_EXECUTABLE})
 else()
 	message(FATAL_ERROR "Could not find PROTOBUF Compiler")
 endif()
+find_package(JPEG REQUIRED)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(Eigen3 REQUIRED eigen3)
+pkg_check_modules(MJPEGTOOLS REQUIRED mjpegtools)
 
 if(USE_QT5)
 	set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -80,6 +82,8 @@ include_directories(
 	${PROJECT_BINARY_DIR}
 	${Eigen3_INCLUDE_DIRS}
 	${PROTOBUF_INCLUDE_DIRS}
+    ${MJPEGTOOLS_INCLUDE_DIRS}
+	${JPEG_INCLUDE_DIRS}
 )
 
 include(src/shared/CMakeLists.txt.inc)
@@ -345,6 +349,8 @@ set (libs ${QT_LIBRARIES}
 	${OpenCV_LIBS}
 	${FLYCAP_LIBS}
 	${SPINNAKER_LIBS}
+    ${MJPEGTOOLS_LIBRARIES}
+	${JPEG_LIBRARIES}
 )
 target_link_libraries(sslvision ${libs})
 if(USE_QT5)

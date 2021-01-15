@@ -140,14 +140,14 @@ public:
     struct yuv{
         uchar y,u,v;
     };
-    static bool writeYuyvPPM(GlobalV4Linstance::yuyv *pSrc, int width, int height, const char *filename);
+//    static bool writeYuyvPPM(GlobalV4Linstance::yuyv *pSrc, int width, int height, const char *filename);
     static bool writeRgbPPM(GlobalV4Linstance::rgb *imgbuf, int width, int height, const char *filename);
-private:
-    static bool getImageRgb(GlobalV4Linstance::yuyv *pSrc, int width, int height, GlobalV4Linstance::rgb **rgbbuf);
-    static GlobalV4Linstance::rgb yuv2rgb(GlobalV4Linstance::yuv p);
     
+private:
+    static bool getImageRgb(GlobalV4Linstance::yuyv *pSrc, size_t size, int width, int height, GlobalV4Linstance::rgb **rgbbuf);
+    static bool getImageRgb(unsigned char *pSrc, size_t size, int width, int height, GlobalV4Linstance::rgb **rgbbuf);
+    static GlobalV4Linstance::rgb yuv2rgb(GlobalV4Linstance::yuv p);
 };
-
 
 /*!
  \class GlobalV4LinstanceManager

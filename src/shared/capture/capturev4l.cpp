@@ -51,6 +51,9 @@
 
 #include "capturev4l.h"
 #include "conversions.h"
+#include "jpegutils.h"
+#include "yuv4mpeg.h"
+#include "jpeglib.h"
 
 #include <sys/ioctl.h>
 #include <sys/mman.h>
@@ -251,7 +254,7 @@ bool GlobalV4Linstance::captureFrame(RawImage *pImage, int iMaxSpin)
             
             //mid-level copy to RGB
             if (_img->data &&
-                    getImageRgb(reinterpret_cast<GlobalV4Linstance::yuyv *>(_img->data),
+                    getImageRgb(reinterpret_cast<GlobalV4Linstance::yuyv *>(_img->data), _img->length,
                              pImage->getWidth(), pImage->getHeight(),
                              reinterpret_cast<GlobalV4Linstance::rgb **>(&pDest)) )
             {
@@ -339,7 +342,7 @@ bool GlobalV4Linstance::startStreaming(int iWidth_, int iHeight_, int iInputIdx)
     mzero(fmt);
     fmt.fmt.pix.width       = iWidth_;
     fmt.fmt.pix.height      = iHeight_;
-    fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;        //see note at top of file
+    fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;        //see note at top of file
     fmt.fmt.pix.field       = V4L2_FIELD_ALTERNATE;
     fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     if (!xioctl(VIDIOC_S_FMT, &fmt, "SetFormat")) {
@@ -491,16 +494,16 @@ bool GlobalV4Linstance::setControl(int ctrl_id, long s)
 }
 
 //======================= Low level utility functions ====================
-bool GlobalV4Linstance::writeYuyvPPM(GlobalV4Linstance::yuyv *pSrc, int width, int height, const char *filename)
-{
-    GlobalV4Linstance::rgb *bufrgb = NULL;
-    if (!getImageRgb(pSrc, width,height,&bufrgb)) return false;
-    int wrote;
-    wrote = writeRgbPPM(bufrgb,width,height,filename);
-    delete[](bufrgb);
+// bool GlobalV4Linstance::writeYuyvPPM(GlobalV4Linstance::yuyv *pSrc, int width, int height, const char *filename)
+// {
+//     GlobalV4Linstance::rgb *bufrgb = NULL;
+//     if (!getImageRgb(pSrc, width,height,&bufrgb)) return false;
+//     int wrote;
+//     wrote = writeRgbPPM(bufrgb,width,height,filename);
+//     delete[](bufrgb);
     
-    return(wrote > 0);
-}
+//     return(wrote > 0);
+// }
 
 bool GlobalV4Linstance::writeRgbPPM(GlobalV4Linstance::rgb *imgbuf, int width, int height, const char *filename)
 {
@@ -516,25 +519,82 @@ bool GlobalV4Linstance::writeRgbPPM(GlobalV4Linstance::rgb *imgbuf, int width, i
     return(fclose(out) == 0);
 }
 
-bool GlobalV4Linstance::getImageRgb(GlobalV4Linstance::yuyv *pSrc, int width, int height, GlobalV4Linstance::rgb **rgbbuf)
+bool GlobalV4Linstance::getImageRgb(GlobalV4Linstance::yuyv *pSrc, size_t size, int width, int height, GlobalV4Linstance::rgb **rgbbuf)
 {
+    getImageRgb((unsigned char*)pSrc, size, width, height, rgbbuf);
+    return true;
+
+    // if (!rgbbuf) return false;
+    // if ((*rgbbuf)==NULL)
+    //     (*rgbbuf) = new rgb[width * height];
+    
+    // int size = width*height;
+    // GlobalV4Linstance::rgb *pDest = (*rgbbuf);
+    // GlobalV4Linstance::yuv pxCopy;
+    // for (int iP=0; iP<size; iP++) {
+    //     pxCopy.y = (iP&1)? pSrc->y2 : pSrc->y1;
+    //     pxCopy.u = pSrc->u;
+    //     pxCopy.v = pSrc->v;
+    //     (*pDest) = yuv2rgb(pxCopy);
+    //     pDest++;                //advance destination always
+    //     if (iP&1) pSrc++;       //avoid odd field advancement
+    // }
+    // return true;
+}
+
+bool GlobalV4Linstance::getImageRgb(unsigned char *pSrc,size_t size, int width, int height, GlobalV4Linstance::rgb **rgbbuf)
+{
+
     if (!rgbbuf) return false;
     if ((*rgbbuf)==NULL)
         (*rgbbuf) = new rgb[width * height];
-    
-    int size = width*height;
+
+    // variables:
+    struct jpeg_decompress_struct cinfo;
+    struct jpeg_error_mgr jerr;
+
+    // data points to the mjpeg frame received from v4l2.
+    size_t data_size = size;
+    // a *to be allocated* heap array to put the data for
+    // all the pixels after conversion to RGB.
     GlobalV4Linstance::rgb *pDest = (*rgbbuf);
-    GlobalV4Linstance::yuv pxCopy;
-    for (int iP=0; iP<size; iP++) {
-        pxCopy.y = (iP&1)? pSrc->y2 : pSrc->y1;
-        pxCopy.u = pSrc->u;
-        pxCopy.v = pSrc->v;
-        (*pDest) = yuv2rgb(pxCopy);
-        pDest++;                //advance destination always
-        if (iP&1) pSrc++;       //avoid odd field advancement
+    
+    unsigned char *pixels;
+    // ... In the initialization of the program:
+    cinfo.err = jpeg_std_error(&jerr);
+    jpeg_create_decompress(&cinfo);
+    pixels = new unsigned char[width * height * sizeof(unsigned char) * 3];
+
+    // ... Every frame:
+    if (!(pSrc == nullptr) && size > 0)
+    {
+        jpeg_mem_src(&cinfo, pSrc, data_size);
+        int rc = jpeg_read_header(&cinfo, TRUE);
+        jpeg_start_decompress(&cinfo);
+        while (cinfo.output_scanline < cinfo.output_height)
+        {
+            unsigned char *temp_array[] = {pixels + (cinfo.output_scanline) * width * 3};
+            jpeg_read_scanlines(&cinfo, temp_array, 1);
+
+            // get the pointer to the row:
+            unsigned char *pixel_row = (unsigned char *)(temp_array[0]);
+
+            // iterate over the pixels:
+            for (int i = 0; i < cinfo.output_width; i++)
+            {
+                // convert the RGB values to a float in the range 0 - 1
+                pDest->red = *pixel_row++;
+                pDest->green = *pixel_row++;
+                pDest->blue = *pixel_row++;
+                pDest++;
+            }
+        }
+        jpeg_finish_decompress(&cinfo);
+        
     }
     return true;
 }
+
 
 GlobalV4Linstance::rgb GlobalV4Linstance::yuv2rgb(GlobalV4Linstance::yuv p)
 {
@@ -551,6 +611,7 @@ GlobalV4Linstance::rgb GlobalV4Linstance::yuv2rgb(GlobalV4Linstance::yuv p)
     
     return(r);
 }
+
 
 
 
