@@ -51,8 +51,6 @@
 
 #include "capturev4l.h"
 #include "conversions.h"
-#include "jpegutils.h"
-#include "yuv4mpeg.h"
 #include "jpeglib.h"
 
 #include <sys/ioctl.h>
